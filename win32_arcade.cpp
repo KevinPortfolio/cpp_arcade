@@ -10,8 +10,8 @@ typedef unsigned short uint16;
 typedef unsigned int uint32;
 typedef unsigned long long uint64;
 
-typedef float real32;
-typedef double real64;
+typedef float float32;
+typedef double float64;
 
 typedef int bool32;
 
@@ -49,7 +49,10 @@ platform_read_file(char* file_path)
 			 FILE_ATTRIBUTE_NORMAL, 0);
   
   if (img_file == INVALID_HANDLE_VALUE)
+  {
+    DWORD error_code = GetLastError(); // TODO: Resolve this error code cleanly
     return result;
+  }
   
   result.byte_size = GetFileSize(img_file, 0);
   // NOTE: Add 1 for the NULL termination or overflow risk.
@@ -232,8 +235,8 @@ WinMain(_In_ HINSTANCE dll_name, _In_opt_ HINSTANCE unused, _In_ LPSTR cmd_line_
 	  QueryPerformanceCounter(&end_counter);
 
 	  int64 counter_elapsed = end_counter.QuadPart - last_counter.QuadPart;
-	  real64 ms_per_frame = (1000.0f *(real64)counter_elapsed) / (real64)cpu_freq;
-	  real64 fps = (real64)cpu_freq / (real64)counter_elapsed;
+	  float64 ms_per_frame = (1000.0f *(float64)counter_elapsed) / (float64)cpu_freq;
+	  float64 fps = (float64)cpu_freq / (float64)counter_elapsed;
 	}
 
 #ifdef RENDER_OPENGL
