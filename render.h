@@ -1,8 +1,11 @@
 #if !defined(RENDER_H)
 #define RENDER_H
 
-#define VERTEX_SHADER   0x8B31
-#define FRAGMENT_SHADER 0x8B30
+#define VERTEX_SHADER            0x8B31
+#define FRAGMENT_SHADER          0x8B30
+
+#define ARRAY_BUFFER	         0x8892
+#define RENDER_DATA_TYPE_FLOAT   0x1406
 
 struct Shader
 {
@@ -16,6 +19,21 @@ struct Shader
     uint32 shader_component[2];
   };
   uint32 id;
+};
+
+struct RenderElement
+{
+  uint32 id;
+  uint32 bytes_per_subset;
+  uint32 count_per_subset;
+  int32 data_type;
+};
+
+struct RenderObject
+{
+  RenderElement element[3];
+  uint32 id;
+  uint32 element_count;
 };
 
 extern "C" inline void
@@ -36,7 +54,19 @@ render_compile_shader(byte* source_code, uint32 type);
 int32
 render_link_shader(Shader *shader);
 
-inline void
+extern "C" inline void
 render_delete_shader_disk_data(uint32 shader_id);
+
+extern "C" inline void
+render_use_shader(uint32 id_shader);
+
+void
+render_delete_shader(uint32 id_shader);
+
+uint32
+render_alloc_and_fill_buffer(void* data, uint32 buffer_byte_size, uint32 type);
+  
+void
+render_create_object(RenderObject* render_object);
 
 #endif

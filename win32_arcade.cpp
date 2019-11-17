@@ -15,8 +15,10 @@ typedef double float64;
 
 typedef int bool32;
 
-#include "arcade.h"
+#include "math.h"
 #include "render.h"
+#include "utility.h"
+#include "arcade.h"
 #include "utility.cpp"
 File
 platform_read_file(char* file_path);

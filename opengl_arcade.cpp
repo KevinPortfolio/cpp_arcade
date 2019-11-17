@@ -74,7 +74,7 @@ render_link_shader(Shader *shader)
   
   error = glGetError();
 
-  for (int component_index = 0;
+  for (int32 component_index = 0;
        component_index < (sizeof(shader->shader_component)/sizeof(uint32));
        component_index++)
     glDetachShader(shader->id, shader->shader_component[component_index]);
@@ -86,4 +86,46 @@ inline void
 render_delete_shader_disk_data(uint32 shader_id)
 {
   glDeleteShader(shader_id);
+}
+
+inline void
+render_use_shader(uint32 id_shader)
+{
+  glUseProgram(id_shader);
+}
+
+void
+render_delete_shader(uint32 id_shader)
+{
+  glUseProgram(0);
+  glDeleteProgram(id_shader);
+}
+
+uint32
+render_alloc_and_fill_buffer(void* data, uint32 buffer_byte_size, uint32 type)
+{
+  uint32 buffer_id;
+  glGenBuffers(1, &buffer_id);
+  glBindBuffer(type, buffer_id);
+  glBufferData(type, buffer_byte_size, data, GL_STATIC_DRAW);
+  glBindBuffer(type, 0);
+  // TODO: Error handling
+  return buffer_id;
+}
+
+void
+render_create_object(RenderObject* render_object)
+{
+  glGenVertexArrays(1, &render_object->id);	
+  glBindVertexArray(render_object->id);
+
+  for (uint32 element_index = 0; element_index < render_object->element_count; element_index++)
+  {
+    glBindBuffer(GL_ARRAY_BUFFER, render_object->element[element_index].id);
+    glVertexAttribPointer(element_index, render_object->element[element_index].count_per_subset,
+			  render_object->element[element_index].data_type, GL_FALSE,
+			  render_object->element[element_index].bytes_per_subset, 0);
+    glEnableVertexAttribArray(element_index);
+  }
+  glBindVertexArray(0);
 }
