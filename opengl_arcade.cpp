@@ -5,6 +5,7 @@ inline void
 render_initialize_libraries()
 {
   opengl_load_functions();
+  glLineWidth(10.0f);
 }
 
 inline void
@@ -94,7 +95,7 @@ render_use_shader(uint32 id_shader)
   glUseProgram(id_shader);
 }
 
-void
+inline void
 render_delete_shader(uint32 id_shader)
 {
   glUseProgram(0);
@@ -128,4 +129,18 @@ render_create_object(RenderObject* render_object)
     glEnableVertexAttribArray(element_index);
   }
   glBindVertexArray(0);
+}
+
+void
+render_draw(unsigned int render_object_id, int start_vertex, unsigned int vertice_count, int mode)
+{
+  glBindVertexArray(render_object_id);
+  glDrawArrays(mode, start_vertex, vertice_count);
+  glBindVertexArray(0);
+}
+
+inline void
+render_update_mat4x4(unsigned int variable_position, float* data)
+{
+  glUniformMatrix4fv(variable_position, 1, 0, data);
 }
