@@ -10,6 +10,13 @@ struct Camera
   m4 view_mat;
 };
 
+struct ObjectMesh
+{
+  float *vertice;
+  float *color;
+  uint32 vertice_count;
+};
+
 Shader
 parse_glsl(byte* shader_file_data, uint32 byte_count);
 

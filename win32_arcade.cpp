@@ -72,6 +72,100 @@ platform_read_file(char* file_path)
   return result;
 }
 
+char // TODO: Add UNICODE support
+platform_create_font(const char* file_name, const char* font_name, int font_height, int font_weight,
+		     int* return_height, long width_buf[256], long height_buf[256], unsigned char* data_buf[256])
+{
+  
+  BYTE *bitmap_data = 0;
+  SIZE font_size; 
+  UINT32 *bmp_ptr, *glyph_buf_ptr, *bmp_row, pixel, pitch;
+  INT32 bmp_width, bmp_height;
+  UINT8 *glyph_buf_row, alpha;
+
+  BITMAPINFO bitmap_info = {};
+  bitmap_info.bmiHeader.biSize = sizeof(bitmap_info.bmiHeader);
+  bitmap_info.bmiHeader.biWidth = 1024;
+  bitmap_info.bmiHeader.biHeight = 1024;
+  bitmap_info.bmiHeader.biPlanes = 1;
+  bitmap_info.bmiHeader.biBitCount = 32;
+  bitmap_info.bmiHeader.biCompression = BI_RGB;
+
+  HDC device_context = CreateCompatibleDC(GetDC(0)); //TODO: Release this DC later
+  
+  if (device_context)
+  {
+    SetBkColor(device_context, RGB(0, 0, 0)); // NOTE: Set the background brush to black (default is white).
+    
+    // NOTE: Returns bottom up space. ptr at top
+    HBITMAP font_bmp = CreateDIBSection(device_context, &bitmap_info, DIB_RGB_COLORS, (void**)& bitmap_data, 0, 0);
+    // NOTE: Need to release bitmap
+
+    if (!font_bmp)
+      return -1;
+
+    SelectObject(device_context, font_bmp);
+    AddFontResourceExA(file_name, FR_PRIVATE, 0);
+    
+    HFONT font = CreateFontA(font_height, 0, 0, 0, font_weight, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
+		       CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, font_name);
+    SelectObject(device_context, font);
+    
+    *return_height = font_height;
+    
+    TEXTMETRIC font_metrics;
+    if (!GetTextMetrics(device_context, &font_metrics))
+      OutputDebugStringA("Failed to get TextMetrics");
+    
+    for (char glyph= 32; glyph < 127; glyph++)
+    {
+      bmp_width = 1024;
+      bmp_height = 1024;
+      
+      if (!GetTextExtentPoint32A(device_context, &glyph, 1, &font_size))
+	OutputDebugStringA("ERROR: GetTextExtentPoint32W() Failed in platform_create_font()\n");
+      width_buf[glyph] = font_size.cx;
+      height_buf[glyph] = font_size.cy;
+      
+      if (SetTextColor(device_context, RGB(255, 255, 255)) == CLR_INVALID)
+	OutputDebugStringA("ERROR: SetTextColor() Failed in platform_create_font()\n");
+      if (!TextOutA(device_context, 0, 0, &glyph, 1))
+	OutputDebugStringA("ERROR: TextOutW() Failed in platform_create_font()\n");
+      
+      data_buf[glyph] = new UCHAR[(INT64)font_size.cx * font_size.cy * 4]{};
+      //NOTE: 4 because RGBA
+      
+      pitch = font_size.cx * 4;
+      glyph_buf_row = data_buf[glyph] + (((UINT64)font_size.cy - 1) * pitch);
+    
+      bmp_row = (UINT32*)bitmap_data + (((UINT64)bmp_height - 1) * bmp_width);
+      // NOTE: Initialize and move ptr to 
+      
+      for (INT32 y = 0; y < font_size.cy; y++)
+      {
+	bmp_ptr = (UINT32*)bmp_row;
+	glyph_buf_ptr = (UINT32*)glyph_buf_row;
+	for (INT32 x = 0; x < font_size.cx; x++)
+	{
+	  pixel = *bmp_ptr;
+	  alpha = (UINT8)(*bmp_ptr & 0xFF);
+	  *glyph_buf_ptr++ = ((alpha << 24) | (alpha << 16) | (alpha << 8) | (alpha << 0));
+	  bmp_ptr++;
+	}
+	glyph_buf_row -= pitch;
+	bmp_row -= bmp_width;
+      }
+    }
+    
+    if (font_bmp)
+      DeleteObject(font_bmp);
+    
+    //    ReleaseDC(0, device_context);
+    return 1;
+  }
+  return -1;
+}
+
 void
 win32_opengl_init(HDC device_context)
 {

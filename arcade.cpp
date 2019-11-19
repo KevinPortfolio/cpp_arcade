@@ -46,25 +46,30 @@ program_start_up(GameState* game_state)
 
   v3 point_a(game_state->window_width / 2.0f, 100.0f, 0.0f);
   v3 point_b(game_state->window_width / 2.0f, game_state->window_height - 100.0f, 0.0f);
-  float line_vertice[6] =
-    {
+
+  ObjectMesh line_mesh;
+  line_mesh.vertice = new float[6] {
      point_a.x, point_a.y, point_a.z,
      point_b.x, point_b.y, point_b.z
     };
   
-  float vertice_color[6] =
-    {
+  line_mesh.color = new float[6]{
      1.0f, 1.0f, 1.0f,
      1.0f, 1.0f, 1.0f
     };
 
-  line.vertice_count = 6;
-  line.element[0].id = render_alloc_and_fill_buffer(line_vertice, line.vertice_count * sizeof(float),
+  line_mesh.vertice_count = 6;
+  
+  line.vertice_count = line_mesh.vertice_count;
+  line.element[0].id = render_alloc_and_fill_buffer(line_mesh.vertice, line.vertice_count * sizeof(float),
 						    ARRAY_BUFFER);
-  line.element[1].id = render_alloc_and_fill_buffer(vertice_color, line.vertice_count * sizeof(float),
+  line.element[1].id = render_alloc_and_fill_buffer(line_mesh.color, line.vertice_count * sizeof(float),
 						    ARRAY_BUFFER);
-  line.element_count = 2;
 
+  delete[] line_mesh.vertice;
+  delete[] line_mesh.color;
+  
+  line.element_count = 2;
   line.element[0].count_per_subset = 3;
   line.element[0].bytes_per_subset = line.element[0].count_per_subset * sizeof(float);
   line.element[0].data_type = RENDER_DATA_TYPE_FLOAT;
