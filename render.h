@@ -1,11 +1,13 @@
 #if !defined(RENDER_H)
 #define RENDER_H
 
-#define VERTEX_SHADER            0x8B31
-#define FRAGMENT_SHADER          0x8B30
+#define VERTEX_SHADER                    0x8B31
+#define FRAGMENT_SHADER                  0x8B30
 
-#define ARRAY_BUFFER	         0x8892
-#define RENDER_DATA_TYPE_FLOAT   0x1406
+#define ARRAY_BUFFER	                 0x8892
+#define GL_ELEMENT_ARRAY_BUFFER          0x8893
+#define RENDER_DATA_TYPE_FLOAT           0x1406
+#define RENDER_DATA_TYPE_UNSIGNED_INT    0x1405
 
 #define RENDER_MODE_POINTS          0x0000
 #define RENDER_MODE_LINES           0x0001
@@ -46,6 +48,7 @@ struct RenderObject
   uint32 id;
   uint32 element_count;
   uint32 vertice_count;
+  uint32 indice_count;
 };
 
 extern "C" inline void
@@ -83,6 +86,15 @@ render_create_object(RenderObject* render_object);
 
 void
 render_draw(unsigned int render_object_id, int start_vertex, unsigned int vertice_count, int mode);
+
+void
+render_draw(uint32 render_object_id, uint32 indice_buffer_id, uint32 indice_count);
+
+void
+render_allocate_texture(uint32* texture_id, void* data, uint32 width, uint32 height, int32 bytes_per_pixel);
+
+extern "C" inline void
+render_bind_texture(uint32 texture_id);
 
 extern "C" inline void
 render_update_mat4x4(unsigned int variable_position, float* data);

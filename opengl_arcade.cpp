@@ -58,7 +58,7 @@ render_link_shader(Shader *shader)
   shader->id = glCreateProgram();
   GLint error = 0;
 
-  for (int component_index = 0;
+  for (int32 component_index = 0;
        component_index < (sizeof(shader->shader_component)/sizeof(uint32));
        component_index++)
   {
@@ -132,15 +132,53 @@ render_create_object(RenderObject* render_object)
 }
 
 void
-render_draw(unsigned int render_object_id, int start_vertex, unsigned int vertice_count, int mode)
+render_draw(uint32 render_object_id, int32 start_vertex, uint32 vertice_count, int32 mode)
 {
   glBindVertexArray(render_object_id);
   glDrawArrays(mode, start_vertex, vertice_count);
   glBindVertexArray(0);
 }
 
+void
+render_draw(uint32 render_object_id, uint32 indice_buffer_id, uint32 indice_count)
+{
+  glBindVertexArray(render_object_id);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indice_buffer_id);
+  glDrawElements(GL_TRIANGLES, indice_count, GL_UNSIGNED_INT, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
+}
+
+void
+render_allocate_texture(uint32* texture_id, void* data, uint32 width, uint32 height, int32 bytes_per_pixel)
+{
+  glGenTextures(1, texture_id);
+  glBindTexture(GL_TEXTURE_2D, *texture_id);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+  if (bytes_per_pixel == 1) 
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width, height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, data);
+  else if (bytes_per_pixel == 2) 
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width, height, 0, GL_LUMINANCE, GL_UNSIGNED_SHORT, data);
+  else if (bytes_per_pixel == 3) 
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+  else if (bytes_per_pixel == 4)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+  
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 inline void
-render_update_mat4x4(unsigned int variable_position, float* data)
+render_bind_texture(uint32 texture_id)
+{
+  glBindTexture(GL_TEXTURE_2D, texture_id);
+}
+
+inline void
+render_update_mat4x4(uint32 variable_position, float32* data)
 {
   glUniformMatrix4fv(variable_position, 1, 0, data);
 }

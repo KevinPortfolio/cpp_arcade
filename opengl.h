@@ -9,13 +9,15 @@
 #define GL_STACK_UNDERFLOW                0x0504
 #define GL_OUT_OF_MEMORY                  0x0505
 
-#define GL_COMPILE_STATUS 0x8B81
-#define GL_ATTACHED_SHADERS 0x8B85
-#define GL_LINK_STATUS 0x8B82
+#define GL_COMPILE_STATUS                 0x8B81
+#define GL_ATTACHED_SHADERS               0x8B85
+#define GL_LINK_STATUS                    0x8B82
 
-#define GL_ARRAY_BUFFER 0x8892
-
-#define GL_STATIC_DRAW 0x88E4
+#define GL_ARRAY_BUFFER                   0x8892
+  
+#define GL_TEXTURE_2D                     0x0DE1
+#define GL_CLAMP_TO_EDGE                  0x812F
+#define GL_STATIC_DRAW                    0x88E4
   
 typedef unsigned int GLenum;
 typedef unsigned char GLboolean;
