@@ -283,6 +283,16 @@ math_tangent(float radians)
 }
 
 m4
+math_translate(m4 &matrix, v3 &vector)
+{
+  m4 result = matrix;
+  result.rc[3][0] += vector.arr[0];
+  result.rc[3][1] += vector.arr[1];
+  result.rc[3][2] += vector.arr[2];
+  return(result);
+}
+
+m4
 math_ortho_mat(float left, float right, float bottom, float top, float near, float far,
 	       unsigned short reverse_z_axis)
 {

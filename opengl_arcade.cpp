@@ -172,6 +172,12 @@ render_allocate_texture(uint32* texture_id, void* data, uint32 width, uint32 hei
 }
 
 inline void
+render_bind_buffer(uint32 buffer_id, uint32 buffer_type)
+{
+  glBindBuffer(buffer_type, buffer_id);
+}
+
+inline void
 render_bind_texture(uint32 texture_id)
 {
   glBindTexture(GL_TEXTURE_2D, texture_id);

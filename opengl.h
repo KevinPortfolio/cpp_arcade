@@ -14,7 +14,8 @@
 #define GL_LINK_STATUS                    0x8B82
 
 #define GL_ARRAY_BUFFER                   0x8892
-  
+#define GL_ELEMENT_ARRAY_BUFFER           0x8893
+
 #define GL_TEXTURE_2D                     0x0DE1
 #define GL_CLAMP_TO_EDGE                  0x812F
 #define GL_STATIC_DRAW                    0x88E4

@@ -5,7 +5,8 @@
 #define FRAGMENT_SHADER                  0x8B30
 
 #define ARRAY_BUFFER	                 0x8892
-#define GL_ELEMENT_ARRAY_BUFFER          0x8893
+#define ELEMENT_ARRAY_BUFFER             0x8893
+
 #define RENDER_DATA_TYPE_FLOAT           0x1406
 #define RENDER_DATA_TYPE_UNSIGNED_INT    0x1405
 
@@ -92,6 +93,9 @@ render_draw(uint32 render_object_id, uint32 indice_buffer_id, uint32 indice_coun
 
 void
 render_allocate_texture(uint32* texture_id, void* data, uint32 width, uint32 height, int32 bytes_per_pixel);
+
+extern "C" inline void
+render_bind_buffer(uint32 buffer_id, uint32 buffer_type);
 
 extern "C" inline void
 render_bind_texture(uint32 texture_id);
