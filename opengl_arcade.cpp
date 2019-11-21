@@ -84,7 +84,7 @@ render_link_shader(Shader *shader)
 }
 
 inline void
-render_delete_shader_disk_data(uint32 shader_id)
+render_delete_shader_data(uint32 shader_id)
 {
   glDeleteShader(shader_id);
 }
@@ -181,6 +181,12 @@ inline void
 render_bind_texture(uint32 texture_id)
 {
   glBindTexture(GL_TEXTURE_2D, texture_id);
+}
+
+inline void
+render_update_int(uint32 variable_position, int32 integer)
+{
+  glUniform1i(variable_position, integer);
 }
 
 inline void

@@ -323,8 +323,8 @@ WinMain(_In_ HINSTANCE dll_name, _In_opt_ HINSTANCE unused, _In_ LPSTR cmd_line_
 	_In_ int display_flags)
 {
 	GameState game_state;
-	game_state.window_width = 1700;
-	game_state.window_height = 1000;
+	game_state.window_width = 1000;
+	game_state.window_height = 500;
 
 	WNDCLASSEXA win_class_info = {};
 	win_class_info.cbSize = sizeof(WNDCLASSEX);

@@ -71,7 +71,7 @@ int32
 render_link_shader(Shader *shader);
 
 extern "C" inline void
-render_delete_shader_disk_data(uint32 shader_id);
+render_delete_shader_data(uint32 shader_id);
 
 extern "C" inline void
 render_use_shader(uint32 id_shader);
@@ -86,19 +86,24 @@ void
 render_create_object(RenderObject* render_object);
 
 void
-render_draw(unsigned int render_object_id, int start_vertex, unsigned int vertice_count, int mode);
+render_draw(unsigned int render_object_id, int start_vertex, unsigned int vertice_count,
+	    int mode);
 
 void
 render_draw(uint32 render_object_id, uint32 indice_buffer_id, uint32 indice_count);
 
 void
-render_allocate_texture(uint32* texture_id, void* data, uint32 width, uint32 height, int32 bytes_per_pixel);
+render_allocate_texture(uint32* texture_id, void* data, uint32 width, uint32 height,
+			int32 bytes_per_pixel);
 
 extern "C" inline void
 render_bind_buffer(uint32 buffer_id, uint32 buffer_type);
 
 extern "C" inline void
 render_bind_texture(uint32 texture_id);
+
+extern "C" inline void
+render_update_int(uint32 variable_position, int32 integer);
 
 extern "C" inline void
 render_update_mat4x4(unsigned int variable_position, float* data);
