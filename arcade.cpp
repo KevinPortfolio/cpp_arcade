@@ -107,7 +107,7 @@ temp_create_shader(Shader *shader, char* file_path)
 int32
 program_start_up(GameState* game_state)
 {
-  platform_create_font("c:/Windows/Fonts/arial.ttf\0", "arial\0", &font, 24, FONT_NORMAL);
+  // platform_create_font("c:/Windows/Fonts/arial.ttf\0", "arial\0", &font, 24, FONT_NORMAL);
   render_initialize_libraries();
   temp_create_shader(&shader[0], "../../repo/cpp_arcade/default.shader");
   temp_create_shader(&shader[1], "../../repo/cpp_arcade/default_texture.shader");
@@ -190,8 +190,9 @@ program_run_loop()
   model_mat = math_translate(model_mat, rect_position);
   render_update_mat4x4(2, model_mat.arr);
     
-  render_bind_texture(font.texture_id[3]);
-  render_draw(glyph_render_obj[3].id, glyph_render_obj[3].element[2].id,
-	      glyph_render_obj[3].indice_count);
+  // render_bind_texture(font.texture_id[3]);
+  //  render_draw(glyph_render_obj[3].id, glyph_render_obj[3].element[2].id,
+  //	      glyph_render_obj[3].indice_count);
+  //   render_bind_texture(0);
   return 1;
 }

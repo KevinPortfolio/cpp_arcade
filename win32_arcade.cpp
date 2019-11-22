@@ -372,19 +372,19 @@ WinMain(_In_ HINSTANCE dll_name, _In_opt_ HINSTANCE unused, _In_ LPSTR cmd_line_
 	QueryPerformanceCounter(&last_counter);
 	while ((msg.message != WM_QUIT) && full_of_life)
 	{
-		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
-	  	{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-	  	}
-	 	full_of_life = program_run_loop();
-
+	  if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+	  {
+	    TranslateMessage(&msg);
+	    DispatchMessage(&msg);
+	  }
+	  full_of_life = program_run_loop();
+	  
 	  if (!SwapBuffers(window_device_context))
 	    OutputDebugStringA("Swapping Buffers Failed!");
-
+	  
 	  LARGE_INTEGER end_counter;
 	  QueryPerformanceCounter(&end_counter);
-
+	  
 	  int64 counter_elapsed = end_counter.QuadPart - last_counter.QuadPart;
 	  float64 ms_per_frame = (1000.0f *(float64)counter_elapsed) / (float64)cpu_freq;
 	  float64 fps = (float64)cpu_freq / (float64)counter_elapsed;
