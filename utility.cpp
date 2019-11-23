@@ -84,9 +84,10 @@ parse_glsl_vertice(File shader_file)
     
     if (result.byte_size)
     {
-      result.data = new byte[result.byte_size];
+      result.data = new byte[result.byte_size + 1];
       for (unsigned int i = 0; i < result.byte_size; i++)
 	result.data[i] = file_itr[i + begin_file_index];
+      result.data[result.byte_size] = 0;
     }
   }
   
@@ -158,10 +159,10 @@ parse_glsl_fragment(File shader_file)
     
     if (result.byte_size)
     {
-      result.data = new byte[result.byte_size];
+      result.data = new byte[result.byte_size + 1];
       for (unsigned int i = 0; i < result.byte_size; i++)
 	result.data[i] = file_itr[i + begin_file_index];
-      
+      result.data[result.byte_size] = 0;
     }
   }
    return result;

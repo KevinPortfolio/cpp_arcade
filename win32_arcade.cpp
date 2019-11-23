@@ -84,6 +84,7 @@ platform_read_file(char* file_path)
   {
     // TODO: Check for error or asynchronous completion.
   }
+  result.data[result.byte_size] = 0;
   CloseHandle(img_file);
   return result;
 }

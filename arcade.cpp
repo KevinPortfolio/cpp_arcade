@@ -1,9 +1,60 @@
 static Camera camera;
 static RenderObject line;
+static RenderObject rectangle;
 static RenderObject glyph_render_obj[95]{};
 
 static Shader shader[2];
 static Font font;
+
+void
+temp_create_rectangle(RenderObject *rectangle, float width, float height)
+{
+  ObjectMesh rectangle_mesh;
+  
+  rectangle_mesh.vertice_arr_size = 12;
+  rectangle_mesh.texture_coord_arr_size = 8;
+  rectangle_mesh.indice_arr_size = 6;
+  rectangle_mesh.texture_coord = new float32[rectangle_mesh.texture_coord_arr_size]
+					    {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f };
+  
+  rectangle_mesh.indice = new uint32[rectangle_mesh.indice_arr_size] {0, 1, 3, 3, 2, 0};
+  
+  rectangle_mesh.vertice = new float32[rectangle_mesh.vertice_arr_size]
+				      {0.0f, 0.0f, 0.0f, width,
+				       0.0f, 0.0f, 0.0f, height, 0.0f,
+				       width, height, 0.0f,};
+    
+  rectangle->vertice_count = 4;
+  rectangle->indice_count = 6;
+  rectangle->element[0].id = render_alloc_and_fill_buffer(rectangle_mesh.vertice,
+	       rectangle_mesh.vertice_arr_size * sizeof(float32), ARRAY_BUFFER);
+    
+  rectangle->element[1].id = render_alloc_and_fill_buffer(rectangle_mesh.texture_coord,
+	    rectangle_mesh.texture_coord_arr_size * sizeof(float32), ARRAY_BUFFER);
+    
+  rectangle->element[2].id = render_alloc_and_fill_buffer(rectangle_mesh.indice,
+	    rectangle_mesh.indice_arr_size * sizeof(uint32), ELEMENT_ARRAY_BUFFER);
+    
+  rectangle->element_count = 2;
+  rectangle->element[0].count_per_subset = 3;
+  rectangle->element[0].bytes_per_subset = rectangle->element[0].count_per_subset * sizeof(float32);
+  rectangle->element[0].data_type = RENDER_DATA_TYPE_FLOAT;
+  
+  rectangle->element[1].count_per_subset = 2;
+  rectangle->element[1].bytes_per_subset = rectangle->element[1].count_per_subset * sizeof(float32);
+  rectangle->element[1].data_type = RENDER_DATA_TYPE_FLOAT;
+    
+  rectangle->element[2].count_per_subset = 3;
+  rectangle->element[2].bytes_per_subset = rectangle->element[1].count_per_subset * sizeof(uint32);
+  rectangle->element[2].data_type = RENDER_DATA_TYPE_UNSIGNED_INT; 
+
+  render_bind_buffer(rectangle->element[2].id, ELEMENT_ARRAY_BUFFER);
+  render_create_object(rectangle);
+
+  delete[] rectangle_mesh.vertice;
+  delete[] rectangle_mesh.texture_coord;
+  delete[] rectangle_mesh.indice;
+}
 
 void
 temp_create_font_rectangles()
@@ -69,7 +120,6 @@ temp_create_font_rectangles()
   }
   delete[] rectangle_mesh.texture_coord;
   delete[] rectangle_mesh.indice;
-
 }
 
 void
@@ -89,6 +139,7 @@ temp_create_shader(Shader *shader, char* file_path)
     render_delete_shader_data(shader->vertex);
     delete[] vertice_shader_source.data;
     vertice_shader_source.data = 0;
+    vertice_shader_source.byte_size = 0;
   }
   
   if (fragment_shader_source.data)
@@ -96,18 +147,47 @@ temp_create_shader(Shader *shader, char* file_path)
     render_delete_shader_data(shader->fragment);
     delete[] fragment_shader_source.data;
     fragment_shader_source.data = 0;
+    fragment_shader_source.byte_size = 0;
   }
+  
   if (shader_file.data)
   {
-    shader_file.data = 0;
     delete[] shader_file.data;
+    shader_file.data = 0;
+    shader_file.byte_size = 0;
   }
+}
+
+static v3 console_start_position(100.0f, 100.0f, 0.0f);
+static v3 console_caret(100.0f, 100.0f, 0.0f);
+
+void
+temp_text_print_line(char* text)
+{
+  v3 rect_position = console_caret;
+  m4 model_mat = math_identity_mat();
+  model_mat = math_translate(model_mat, rect_position);
+  render_update_mat4x4(2, model_mat.arr);
+
+  while (*text)
+  {
+    char glyph = *(text++) - 32;
+    render_bind_texture(font.texture_id[glyph]);
+    render_draw(glyph_render_obj[glyph].id, glyph_render_obj[glyph].element[2].id,
+		glyph_render_obj[glyph].indice_count);
+    render_bind_texture(0);
+    v3 new_rect_position(0.0f, 0.0f, 0.0f);
+    new_rect_position.x += font.glyph_width[glyph];
+    model_mat = math_translate(model_mat, new_rect_position);
+    render_update_mat4x4(2, model_mat.arr);
+  }
+  console_caret.y -= font.height;
 }
 
 int32
 program_start_up(GameState* game_state)
 {
-  // platform_create_font("c:/Windows/Fonts/arial.ttf\0", "arial\0", &font, 24, FONT_NORMAL);
+  platform_create_font("c:/Windows/Fonts/arial.ttf\0", "arial\0", &font, 24, FONT_NORMAL);
   render_initialize_libraries();
   temp_create_shader(&shader[0], "../../repo/cpp_arcade/default.shader");
   temp_create_shader(&shader[1], "../../repo/cpp_arcade/default_texture.shader");
@@ -162,6 +242,8 @@ program_start_up(GameState* game_state)
   line.element[1].data_type = RENDER_DATA_TYPE_FLOAT; 
   
   render_create_object(&line);  
+
+  temp_create_rectangle(&rectangle, 100.0f, 100.0f);
   
   platform_delete_font(&font);
   render_clear_screen();
@@ -182,17 +264,18 @@ program_run_loop()
   render_draw(line.id, 0, line.vertice_count, RENDER_MODE_LINES);
     
   render_use_shader(shader[1].id);
+  
   render_update_mat4x4(3, camera.view_mat.arr);
   render_update_mat4x4(4, camera.projection_mat.arr);
   render_update_int(5, 0);
-  
-  v3 rect_position(10.0f, 10.0f, 0.0f);
-  model_mat = math_translate(model_mat, rect_position);
+
+  v3 position(200.0f, 200.0f, 0.0f);
+  model_mat = math_translate(model_mat, position);
   render_update_mat4x4(2, model_mat.arr);
-    
-  // render_bind_texture(font.texture_id[3]);
-  //  render_draw(glyph_render_obj[3].id, glyph_render_obj[3].element[2].id,
-  //	      glyph_render_obj[3].indice_count);
-  //   render_bind_texture(0);
+  render_draw(rectangle.id, rectangle.element[2].id, rectangle.indice_count);
+  
+  temp_text_print_line("Hello World!");
+  temp_text_print_line("Is this thing working?");
+  console_caret = console_start_position;
   return 1;
 }
