@@ -2,12 +2,16 @@ static Camera camera;
 static RenderObject line;
 static RenderObject rectangle;
 static RenderObject glyph_render_obj[95]{};
-
+static RenderGroup rect;
 static Shader shader[2];
 static Font font;
+static uint32 white_texture_id;
+
+static v3 console_start_position;
+static v3 console_caret;
 
 void
-temp_create_rectangle(RenderObject *rectangle, float width, float height)
+gpu_alloc_rectangle(RenderObject *rectangle, float width, float height)
 {
   ObjectMesh rectangle_mesh;
   
@@ -158,9 +162,6 @@ temp_create_shader(Shader *shader, char* file_path)
   }
 }
 
-static v3 console_start_position(100.0f, 100.0f, 0.0f);
-static v3 console_caret(100.0f, 100.0f, 0.0f);
-
 void
 temp_text_print_line(char* text)
 {
@@ -186,9 +187,15 @@ temp_text_print_line(char* text)
 
 int32
 program_start_up(GameState* game_state)
-{
+{ 
   platform_create_font("c:/Windows/Fonts/arial.ttf\0", "arial\0", &font, 24, FONT_NORMAL);
+  console_start_position = v3(0.0f, game_state->window_height - font.height, 0.0f);
+  console_caret = console_start_position;
+  
   render_initialize_libraries();
+  render_enable(RENDER_BLEND);
+  render_set_blend_func(RENDER_SOURCE_ALPHA, RENDER_BLEND_FUNC_ONE_MINUS_SRC_ALPHA);
+  
   temp_create_shader(&shader[0], "../../repo/cpp_arcade/default.shader");
   temp_create_shader(&shader[1], "../../repo/cpp_arcade/default_texture.shader");
 
@@ -208,6 +215,9 @@ program_start_up(GameState* game_state)
   v3 updated_forward_vec = camera.position + camera.forward_vec;
   camera.view_mat = math_lookat_mat(camera.position, updated_forward_vec, camera.up_vec);
 
+  byte white_texture_data[4] = {0xFF, 0xFF, 0xFF, 0xFF};
+  render_allocate_texture(&white_texture_id, white_texture_data, 1, 1, 4);
+  
   v3 point_a(game_state->window_width / 2.0f, 100.0f, 0.0f);
   v3 point_b(game_state->window_width / 2.0f, game_state->window_height - 100.0f, 0.0f);
  
@@ -243,39 +253,84 @@ program_start_up(GameState* game_state)
   
   render_create_object(&line);  
 
-  temp_create_rectangle(&rectangle, 100.0f, 100.0f);
+  gpu_alloc_rectangle(&rectangle, 100.0f, 100.0f);  
+
+  rect.render_obj_count = 3;
+  rect.render_object = new RenderObject[rect.render_obj_count]{};
+  rect.position = new v3[rect.render_obj_count]{};
+  rect.shader_id = shader[1].id;
+  float rect_width = 50.0f;
+  float rect_height = 50.0f;
+  for (uint32 index = 0; index < rect.render_obj_count; index++)
+  {
+    gpu_alloc_rectangle(&rect.render_object[index], rect_width, rect_height);
+  }
+  rect.position[0] = v3(400.0f, 100.0f, 0.0);
+  rect.position[1] = v3(200.0f, 100.0f, 0.0);
+  rect.position[2] = v3(0.0f, 100.0f, 0.0);
   
   platform_delete_font(&font);
   render_clear_screen();
   return 1;
 }
 
+void
+draw_render_group(RenderGroup* render_group)  
+{
+  m4 model_mat = math_identity_mat();
+
+  if (render_group->render_object)
+  {
+    for (uint32 index = 0; index < render_group->render_obj_count; index++)
+    {
+      model_mat = math_translate(model_mat, render_group->position[index]);
+      render_update_mat4x4(2, model_mat.arr);
+      model_mat = math_identity_mat();
+
+      if (render_group->render_object[index].indice_count)
+      {
+	render_draw(render_group->render_object[index].id, render_group->render_object[index].element[2].id,
+		    render_group->render_object[index].indice_count);
+      }
+      else
+      {
+	render_draw(render_group->render_object[index].id, 0, render_group->render_object[index].vertice_count,
+		    RENDER_MODE_LINES);
+      }
+      
+    }
+  }
+}
+  
 int32
 program_run_loop()
 {
   render_clear_screen();
 
-  m4 model_mat = math_identity_mat();
   render_use_shader(shader[0].id);
   render_update_mat4x4(3, camera.view_mat.arr);
   render_update_mat4x4(4, camera.projection_mat.arr);
-  render_update_mat4x4(2, model_mat.arr);
 
+  m4 model_mat = math_identity_mat();
+  render_update_mat4x4(2, model_mat.arr);
   render_draw(line.id, 0, line.vertice_count, RENDER_MODE_LINES);
     
-  render_use_shader(shader[1].id);
-  
+  render_use_shader(shader[1].id);  
   render_update_mat4x4(3, camera.view_mat.arr);
   render_update_mat4x4(4, camera.projection_mat.arr);
   render_update_int(5, 0);
-
-  v3 position(200.0f, 200.0f, 0.0f);
-  model_mat = math_translate(model_mat, position);
-  render_update_mat4x4(2, model_mat.arr);
-  render_draw(rectangle.id, rectangle.element[2].id, rectangle.indice_count);
+  
+  render_bind_texture(white_texture_id);
+  draw_render_group(&rect);
+  render_bind_texture(0);
   
   temp_text_print_line("Hello World!");
   temp_text_print_line("Is this thing working?");
   console_caret = console_start_position;
   return 1;
 }
+
+  //v3 position(200.0f, 200.0f, 0.0f);
+  //model_mat = math_translate(model_mat, position);
+  //render_update_mat4x4(2, model_mat.arr);
+  // render_draw(rectangle.id, rectangle.element[2].id, rectangle.indice_count);

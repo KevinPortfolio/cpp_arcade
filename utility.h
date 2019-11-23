@@ -1,6 +1,12 @@
 #if !defined(UTILITY_H)
 #define UTILITY_H
 
+struct Rect
+{
+  v3 bottom_left;
+  v3 top_right;
+};
+
 struct Camera
 {
   v3 up_vec;
@@ -31,6 +37,14 @@ struct Font
   int32 glyph_height[95]{};
   byte* glyph_data[95]{};
   uint32 texture_id[95]{};
+};
+
+struct RenderGroup
+{
+  RenderObject* render_object;
+  v3* position;
+  uint32 shader_id;
+  uint32 render_obj_count;
 };
 
 Shader

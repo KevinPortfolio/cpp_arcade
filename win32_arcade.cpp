@@ -30,6 +30,7 @@ typedef int bool32;
 #include "utility.h"
 #include "arcade.h"
 #include "utility.cpp"
+#include "memory.cpp"
 File
 platform_read_file(char* file_path);
 char 

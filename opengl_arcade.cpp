@@ -26,6 +26,24 @@ render_set_viewport(int32 min_x, int32 min_y, int32 max_x, int32 max_y)
   glViewport(min_x, min_y, max_x, max_y);
 }
 
+inline void
+render_enable(uint32 setting)
+{
+  glEnable(setting);
+}
+
+inline void
+render_set_depth_func(uint32 function_id)
+{
+  glDepthFunc(function_id);
+}
+
+inline void
+render_set_blend_func(uint32 source_type, uint32 function_id)
+{
+  glBlendFunc(source_type, function_id);
+}
+
 uint32
 render_compile_shader(byte* source_code, uint32 type)
 {

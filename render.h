@@ -21,6 +21,13 @@
 #define RENDER_MODE_QUAD_STRIP      0x0008
 #define RENDER_MODE_POLYGON         0x0009
 
+#define RENDER_BLEND                0x0BE2
+#define RENDER_DEPTH_TEST           0x0B71
+
+#define RENDER_ALHPA_FUNC_LEQUAL    0X0203
+#define RENDER_SOURCE_ALPHA         0x0302
+#define RENDER_BLEND_FUNC_ONE_MINUS_SRC_ALPHA    0x0303
+
 struct Shader
 {
   union
@@ -63,6 +70,15 @@ render_clear_screen();
 
 extern "C" inline void
 render_set_viewport(int32 min_x, int32 min_y, int32 max_x, int32 max_y);
+
+extern "C" inline void
+render_enable(uint32 setting);
+
+extern "C" inline void
+render_set_depth_func(uint32 function_id);
+
+extern "C" inline void
+render_set_blend_func(uint32 source_type, uint32 function_id);
 
 uint32
 render_compile_shader(byte* source_code, uint32 type);
