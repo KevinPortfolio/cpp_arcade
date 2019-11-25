@@ -31,6 +31,7 @@ typedef int bool32;
 #include "arcade.h"
 #include "utility.cpp"
 #include "memory.cpp"
+#include "temporary.cpp"
 File
 platform_read_file(char* file_path);
 char 
@@ -325,8 +326,8 @@ WinMain(_In_ HINSTANCE dll_name, _In_opt_ HINSTANCE unused, _In_ LPSTR cmd_line_
 	_In_ int display_flags)
 {
 	GameState game_state;
-	game_state.window_width = 1000;
-	game_state.window_height = 500;
+	game_state.window_width = 1200;
+	game_state.window_height = 800;
 
 	WNDCLASSEXA win_class_info = {};
 	win_class_info.cbSize = sizeof(WNDCLASSEX);

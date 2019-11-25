@@ -39,12 +39,12 @@ struct Font
   uint32 texture_id[95]{};
 };
 
-struct RenderGroup
+struct RenderIteration
 {
   RenderObject* render_object;
   v3* position;
   uint32 shader_id;
-  uint32 render_obj_count;
+  uint32 render_count;
 };
 
 Shader
