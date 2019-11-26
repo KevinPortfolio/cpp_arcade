@@ -27,6 +27,34 @@ union v3
   }
 };
 
+union v4
+{
+  struct
+  {
+    float32 x,y,z,w;
+  };
+  struct
+  {
+    float32 r,g,b,a;
+  };
+  float32 arr[4];
+
+  v4() : x(0.0f), y(0.0f), z(0.0f), w(0.0f){}
+  v4(float X, float Y, float Z, float W)
+  {
+    x = X;
+    y = Y;
+    z = Z;
+    w = W;
+  }
+
+  v4& operator=(v4& vec)
+  {
+    x = vec.x; y = vec.y; z = vec.z; w = vec.w;
+    return *this;
+  }
+};
+
 union m4
 {
   struct
@@ -64,14 +92,14 @@ union m4
 };
 
 inline v3
-operator+(const v3& a, const v3& b)
+operator+(v3& a, v3& b)
 {
   v3 result(a.x + b.x, a.y + b.y, a.z + b.z);
   return(result);
 }
 
 inline v3
-operator-(const v3& a, const v3& b)
+operator-(v3& a, v3& b)
 {
   v3 result(a.x - b.x, a.y - b.y, a.z - b.z);
   return(result);
@@ -94,6 +122,13 @@ inline v3
 operator*(v3 &a, v3 &b)
 {
   v3 result(a.x * b.x, a.y * b.y, a.z * b.z);
+  return(result);
+}
+
+inline v4
+operator*(v4 &a, v4 &b)
+{
+  v4 result(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
   return(result);
 }
 
@@ -155,6 +190,33 @@ math_square_root(float a)
   }
   return(result);
 }
+
+v4
+operator*(const m4& a, const v4& b)
+{
+	v4 result;
+	int a_row, a_col;
+	for (a_row = 0; a_row < 4; a_row++) { 
+		for (a_col = 0; a_col < 4; a_col++) {
+			result.arr[a_row] += a.rc[a_row][a_col] * b.arr[a_col];
+		}
+	}
+	return(result);
+}
+
+v4
+operator*(const v4& a, const m4& b)
+{
+  v4 result;
+  int a_row, a_col;
+  for (a_row = 0; a_row < 4; a_row++) {
+    for (a_col = 0; a_col < 4; a_col++) {
+      result.arr[a_row] += b.rc[a_row][a_col] * a.arr[a_col];
+    }
+  }
+  return(result);
+}
+
 
 inline float
 math_magnitude(v3 &a)
@@ -360,4 +422,133 @@ math_perspective_mat(float field_of_view, float aspect_ratio, float plane_near, 
   result.rc[3][2] = -(2.0f * plane_far * plane_near) / (plane_far - plane_near);
   result.rc[3][3] = 0;
   return(result);
+}
+
+m4
+math_invert(m4 *mat)
+{
+  m4 inverse_mat, result;
+  float det;
+  int i;
+  
+  inverse_mat.arr[0] = mat->arr[5] * mat->arr[10] * mat->arr[15] -
+    mat->arr[5] * mat->arr[11] * mat->arr[14] -
+    mat->arr[9] * mat->arr[6] * mat->arr[15] +
+    mat->arr[9] * mat->arr[7] * mat->arr[14] +
+    mat->arr[13] * mat->arr[6] * mat->arr[11] -
+    mat->arr[13] * mat->arr[7] * mat->arr[10];
+  
+  inverse_mat.arr[4] = -mat->arr[4] * mat->arr[10] * mat->arr[15] +
+    mat->arr[4] * mat->arr[11] * mat->arr[14] +
+    mat->arr[8] * mat->arr[6] * mat->arr[15] -
+    mat->arr[8] * mat->arr[7] * mat->arr[14] -
+    mat->arr[12] * mat->arr[6] * mat->arr[11] +
+    mat->arr[12] * mat->arr[7] * mat->arr[10];
+  
+  inverse_mat.arr[8] = mat->arr[4] * mat->arr[9] * mat->arr[15] -
+    mat->arr[4] * mat->arr[11] * mat->arr[13] -
+    mat->arr[8] * mat->arr[5] * mat->arr[15] +
+    mat->arr[8] * mat->arr[7] * mat->arr[13] +
+    mat->arr[12] * mat->arr[5] * mat->arr[11] -
+    mat->arr[12] * mat->arr[7] * mat->arr[9];
+  
+  inverse_mat.arr[12] = -mat->arr[4] * mat->arr[9] * mat->arr[14] +
+    mat->arr[4] * mat->arr[10] * mat->arr[13] +
+    mat->arr[8] * mat->arr[5] * mat->arr[14] -
+    mat->arr[8] * mat->arr[6] * mat->arr[13] -
+    mat->arr[12] * mat->arr[5] * mat->arr[10] +
+    mat->arr[12] * mat->arr[6] * mat->arr[9];
+  
+  inverse_mat.arr[1] = -mat->arr[1] * mat->arr[10] * mat->arr[15] +
+    mat->arr[1] * mat->arr[11] * mat->arr[14] +
+    mat->arr[9] * mat->arr[2] * mat->arr[15] -
+    mat->arr[9] * mat->arr[3] * mat->arr[14] -
+    mat->arr[13] * mat->arr[2] * mat->arr[11] +
+    mat->arr[13] * mat->arr[3] * mat->arr[10];
+  
+  inverse_mat.arr[5] = mat->arr[0] * mat->arr[10] * mat->arr[15] -
+    mat->arr[0] * mat->arr[11] * mat->arr[14] -
+    mat->arr[8] * mat->arr[2] * mat->arr[15] +
+    mat->arr[8] * mat->arr[3] * mat->arr[14] +
+    mat->arr[12] * mat->arr[2] * mat->arr[11] -
+    mat->arr[12] * mat->arr[3] * mat->arr[10];
+  
+  inverse_mat.arr[9] = -mat->arr[0] * mat->arr[9] * mat->arr[15] +
+    mat->arr[0] * mat->arr[11] * mat->arr[13] +
+    mat->arr[8] * mat->arr[1] * mat->arr[15] -
+    mat->arr[8] * mat->arr[3] * mat->arr[13] -
+    mat->arr[12] * mat->arr[1] * mat->arr[11] +
+    mat->arr[12] * mat->arr[3] * mat->arr[9];
+  
+  inverse_mat.arr[13] = mat->arr[0] * mat->arr[9] * mat->arr[14] -
+    mat->arr[0] * mat->arr[10] * mat->arr[13] -
+    mat->arr[8] * mat->arr[1] * mat->arr[14] +
+    mat->arr[8] * mat->arr[2] * mat->arr[13] +
+    mat->arr[12] * mat->arr[1] * mat->arr[10] -
+    mat->arr[12] * mat->arr[2] * mat->arr[9];
+  
+  inverse_mat.arr[2] = mat->arr[1] * mat->arr[6] * mat->arr[15] -
+    mat->arr[1] * mat->arr[7] * mat->arr[14] -
+    mat->arr[5] * mat->arr[2] * mat->arr[15] +
+    mat->arr[5] * mat->arr[3] * mat->arr[14] +
+    mat->arr[13] * mat->arr[2] * mat->arr[7] -
+    mat->arr[13] * mat->arr[3] * mat->arr[6];
+  
+  inverse_mat.arr[6] = -mat->arr[0] * mat->arr[6] * mat->arr[15] +
+    mat->arr[0] * mat->arr[7] * mat->arr[14] +
+    mat->arr[4] * mat->arr[2] * mat->arr[15] -
+    mat->arr[4] * mat->arr[3] * mat->arr[14] -
+    mat->arr[12] * mat->arr[2] * mat->arr[7] +
+    mat->arr[12] * mat->arr[3] * mat->arr[6];
+  
+  inverse_mat.arr[10] = mat->arr[0] * mat->arr[5] * mat->arr[15] -
+    mat->arr[0] * mat->arr[7] * mat->arr[13] -
+    mat->arr[4] * mat->arr[1] * mat->arr[15] +
+    mat->arr[4] * mat->arr[3] * mat->arr[13] +
+    mat->arr[12] * mat->arr[1] * mat->arr[7] -
+    mat->arr[12] * mat->arr[3] * mat->arr[5];
+  
+  inverse_mat.arr[14] = -mat->arr[0] * mat->arr[5] * mat->arr[14] +
+    mat->arr[0] * mat->arr[6] * mat->arr[13] +
+    mat->arr[4] * mat->arr[1] * mat->arr[14] -
+    mat->arr[4] * mat->arr[2] * mat->arr[13] -
+    mat->arr[12] * mat->arr[1] * mat->arr[6] +
+    mat->arr[12] * mat->arr[2] * mat->arr[5];
+  
+  inverse_mat.arr[3] = -mat->arr[1] * mat->arr[6] * mat->arr[11] +
+    mat->arr[1] * mat->arr[7] * mat->arr[10] +
+    mat->arr[5] * mat->arr[2] * mat->arr[11] -
+    mat->arr[5] * mat->arr[3] * mat->arr[10] -
+    mat->arr[9] * mat->arr[2] * mat->arr[7] +
+    mat->arr[9] * mat->arr[3] * mat->arr[6];
+  
+  inverse_mat.arr[7] = mat->arr[0] * mat->arr[6] * mat->arr[11] -
+    mat->arr[0] * mat->arr[7] * mat->arr[10] -
+    mat->arr[4] * mat->arr[2] * mat->arr[11] +
+    mat->arr[4] * mat->arr[3] * mat->arr[10] +
+    mat->arr[8] * mat->arr[2] * mat->arr[7] -
+    mat->arr[8] * mat->arr[3] * mat->arr[6];
+  
+  inverse_mat.arr[11] = -mat->arr[0] * mat->arr[5] * mat->arr[11] +
+    mat->arr[0] * mat->arr[7] * mat->arr[9] +
+    mat->arr[4] * mat->arr[1] * mat->arr[11] -
+    mat->arr[4] * mat->arr[3] * mat->arr[9] -
+    mat->arr[8] * mat->arr[1] * mat->arr[7] +
+    mat->arr[8] * mat->arr[3] * mat->arr[5];
+  
+  inverse_mat.arr[15] = mat->arr[0] * mat->arr[5] * mat->arr[10] -
+    mat->arr[0] * mat->arr[6] * mat->arr[9] -
+    mat->arr[4] * mat->arr[1] * mat->arr[10] +
+    mat->arr[4] * mat->arr[2] * mat->arr[9] +
+    mat->arr[8] * mat->arr[1] * mat->arr[6] -
+    mat->arr[8] * mat->arr[2] * mat->arr[5];
+  
+  det = mat->arr[0] * inverse_mat.arr[0] + mat->arr[1] * inverse_mat.arr[4] +
+    mat->arr[2] * inverse_mat.arr[8] + mat->arr[3] * inverse_mat.arr[12];
+  if (det == 0)
+    return result;
+  det = 1.0f / det;
+  for (i = 0; i < 16; i++)
+    result.arr[i] = inverse_mat.arr[i] * det;
+  return result;
 }

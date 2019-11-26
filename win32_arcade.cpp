@@ -31,6 +31,7 @@ typedef int bool32;
 #include "arcade.h"
 #include "utility.cpp"
 #include "memory.cpp"
+#include "collision.cpp"
 #include "temporary.cpp"
 File
 platform_read_file(char* file_path);
@@ -39,6 +40,8 @@ platform_create_font(char* file_name, char* font_name, Font* font_object, int de
 void
 platform_delete_font(Font* font_object);
 
+#include "menu.cpp"
+#include "block_fall.cpp"
 #include "arcade.cpp"
 #include <Windows.h>
 #include "opengl_arcade.cpp"
@@ -380,7 +383,7 @@ WinMain(_In_ HINSTANCE dll_name, _In_opt_ HINSTANCE unused, _In_ LPSTR cmd_line_
 	    TranslateMessage(&msg);
 	    DispatchMessage(&msg);
 	  }
-	  full_of_life = program_run_loop();
+	  full_of_life = program_run_loop(&game_state);
 	  
 	  if (!SwapBuffers(window_device_context))
 	    OutputDebugStringA("Swapping Buffers Failed!");

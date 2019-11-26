@@ -80,3 +80,32 @@ gpu_alloc_rectangle(RenderObject *render_object, float width, float height)
   delete[] rectangle_mesh.texture_coord;
   delete[] rectangle_mesh.indice;
 }
+
+
+void
+draw_render_iteration(RenderIteration* render_iteration)  
+{
+  if (render_iteration->render_object)
+  {
+    m4 model_mat = math_identity_mat();
+      
+    for (uint32 index = 0; index < render_iteration->render_count; index++)
+    {
+      model_mat = math_translate(model_mat, render_iteration->position[index]);
+      render_update_mat4x4(2, model_mat.arr);
+      model_mat = math_identity_mat();
+
+      if (render_iteration->render_object->indice_count)
+      {
+	render_draw(render_iteration->render_object->id, render_iteration->render_object->element[2].id,
+		    render_iteration->render_object->indice_count);
+      }
+      else
+      {
+	render_draw(render_iteration->render_object->id, 0, render_iteration->render_object->vertice_count,
+		    RENDER_MODE_LINES);
+      }
+      
+    }
+  }
+}

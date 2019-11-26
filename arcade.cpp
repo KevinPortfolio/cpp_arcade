@@ -12,6 +12,11 @@ static uint32 white_texture_id;
 static v3 console_start_position;
 static v3 console_caret;
 
+typedef void
+module(GameState* game_state);
+
+static module *modules[4];
+
 void
 gpu_alloc_font(Font *font)
 {
@@ -137,38 +142,14 @@ temp_text_print_line(Font &font, char* text)
   console_caret.y -= font.height;
 }
 
-
-void
-draw_render_iteration(RenderIteration* render_iteration)  
-{
-  if (render_iteration->render_object)
-  {
-    m4 model_mat = math_identity_mat();
-      
-    for (uint32 index = 0; index < render_iteration->render_count; index++)
-    {
-      model_mat = math_translate(model_mat, render_iteration->position[index]);
-      render_update_mat4x4(2, model_mat.arr);
-      model_mat = math_identity_mat();
-
-      if (render_iteration->render_object->indice_count)
-      {
-	render_draw(render_iteration->render_object->id, render_iteration->render_object->element[2].id,
-		    render_iteration->render_object->indice_count);
-      }
-      else
-      {
-	render_draw(render_iteration->render_object->id, 0, render_iteration->render_object->vertice_count,
-		    RENDER_MODE_LINES);
-      }
-      
-    }
-  }
-}
-
 int32
 program_start_up(GameState* game_state)
-{ 
+{
+  modules[0] = (module*)load_menu;
+  modules[1] = (module*)menu_loop;
+  modules[2] = (module*)load_block_fall;
+  modules[3] = (module*)block_fall_loop;
+  
   platform_create_font("c:/Windows/Fonts/arial.ttf\0", "arial\0", &font_a, 24, FONT_NORMAL);
   console_start_position = v3(0.0f, game_state->window_height - font_a.height, 0.0f);
   console_caret = console_start_position;
@@ -204,50 +185,37 @@ program_start_up(GameState* game_state)
  
   gpu_alloc_line(&line, point_a, point_b);
   
-  gpu_alloc_rectangle(&rectangle, 100.0f, 100.0f);  
-  
-  rect.render_count = 3;
-  rect.render_object = &rectangle;
-  rect.position = new v3[rect.render_count]{};
-  rect.shader_id = shader[1].id;
-  rect.position[0] = v3(400.0f, 100.0f, 0.0);
-  rect.position[1] = v3(200.0f, 100.0f, 0.0);
-  rect.position[2] = v3(0.0f, 100.0f, 0.0);  
-  
+  game_state->camera = &camera;
+  game_state->texture_id = white_texture_id;
   platform_delete_font(&font_a);
   render_clear_screen();
+  
+  game_state->module_id = 0;
   return 1;
 }
   
 int32
-program_run_loop()
+program_run_loop(GameState *game_state)
 {
   render_clear_screen();
 
-  render_use_shader(shader[0].id);
-  render_update_mat4x4(3, camera.view_mat.arr);
-  render_update_mat4x4(4, camera.projection_mat.arr);
+  modules[game_state->module_id](game_state);
+  
+  //  render_use_shader(shader[0].id);
+  //render_update_mat4x4(3, camera.view_mat.arr);
+  //render_update_mat4x4(4, camera.projection_mat.arr);
 
-  m4 model_mat = math_identity_mat();
-  render_update_mat4x4(2, model_mat.arr);
-  render_draw(line.id, 0, line.vertice_count, RENDER_MODE_LINES);
+  //  m4 model_mat = math_identity_mat();
+  //render_update_mat4x4(2, model_mat.arr);
+  //render_draw(line.id, 0, line.vertice_count, RENDER_MODE_LINES);
     
-  render_use_shader(shader[1].id);  
+  render_use_shader(shader[1].id);  // NOTE: begin console draw
   render_update_mat4x4(3, camera.view_mat.arr);
   render_update_mat4x4(4, camera.projection_mat.arr);
   render_update_int(5, 0);
-  
-  render_bind_texture(white_texture_id);
-  draw_render_iteration(&rect);
-  render_bind_texture(0);
-  
+    
   temp_text_print_line(font_a, "Hello World!");
   temp_text_print_line(font_a, "Is this thing working?");
   console_caret = console_start_position;
   return 1;
 }
-
-  //v3 position(200.0f, 200.0f, 0.0f);
-  //model_mat = math_translate(model_mat, position);
-  //render_update_mat4x4(2, model_mat.arr);
-  // render_draw(rectangle.id, rectangle.element[2].id, rectangle.indice_count);
