@@ -124,4 +124,7 @@ render_update_int(uint32 variable_position, int32 integer);
 extern "C" inline void
 render_update_mat4x4(unsigned int variable_position, float* data);
 
+extern "C" inline void
+render_update_vec3(uint32 variable_position, float arr[3]);
+
 #endif

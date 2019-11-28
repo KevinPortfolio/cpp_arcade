@@ -65,6 +65,7 @@ typedef void __stdcall gl_enable_vertex_attrib_array(GLuint index);
 typedef void __stdcall gl_uniform_matrix_4fv(GLint location, GLsizei count, GLboolean transpose,
 					     const GLfloat* value);
 typedef void __stdcall gl_uniform_1i(GLint location, GLint v0);
+typedef void __stdcall gl_uniform_3f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
 
 static gl_create_shader* glCreateShader;
 static gl_shader_source* glShaderSource;
@@ -93,6 +94,7 @@ static gl_delete_vertex_arrays* glDeleteVertexArrays;
 
 static gl_uniform_matrix_4fv* glUniformMatrix4fv;
 static gl_uniform_1i* glUniform1i;
+static gl_uniform_3f* glUniform3f;
 
 void
 opengl_load_functions()
@@ -122,7 +124,8 @@ opengl_load_functions()
 
   glUniformMatrix4fv = (gl_uniform_matrix_4fv*)wglGetProcAddress("glUniformMatrix4fv");
   glUniform1i = (gl_uniform_1i*)wglGetProcAddress("glUniform1i");
-    
+  glUniform3f = (gl_uniform_3f*)wglGetProcAddress("glUniform3f");
+  
   // OpenGL 3
   glGenVertexArrays = (gl_gen_vertex_arrays*)wglGetProcAddress("glGenVertexArrays");
   glBindVertexArray = (gl_bind_vertex_array*)wglGetProcAddress("glBindVertexArray");

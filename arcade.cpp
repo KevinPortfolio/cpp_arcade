@@ -4,7 +4,7 @@ static RenderObject rectangle;
 
 static RenderIteration rect;
 
-static Shader shader[2];
+static Shader shader[3];
 static Font font_a;
 static uint32 white_texture_id;
 
@@ -31,6 +31,7 @@ program_start_up(GameState* game_state)
   
   temp_create_shader(&shader[0], "../../repo/cpp_arcade/default.shader");
   temp_create_shader(&shader[1], "../../repo/cpp_arcade/default_texture.shader");
+  temp_create_shader(&shader[2], "../../repo/cpp_arcade/text.shader");
 
   gpu_alloc_font(&font_a);
   
@@ -59,6 +60,8 @@ program_start_up(GameState* game_state)
   game_state->camera = &camera;
   game_state->texture_id = white_texture_id;
   game_state->shader_id = shader[1].id;
+  game_state->text_shader_id = shader[2].id;
+  game_state->font = &font_a;
   
   platform_delete_font(&font_a);
   render_clear_screen();
@@ -82,10 +85,12 @@ program_run_loop(GameState *game_state)
   //render_update_mat4x4(2, model_mat.arr);
   //render_draw(line.id, 0, line.vertice_count, RENDER_MODE_LINES);
     
-  render_use_shader(shader[1].id);  // NOTE: begin console draw
+  render_use_shader(shader[2].id);  // NOTE: begin console draw
   render_update_mat4x4(3, camera.view_mat.arr);
   render_update_mat4x4(4, camera.projection_mat.arr);
   render_update_int(5, 0);
+  v3 red(0.0f, 1.0f, 0.0f);
+  render_update_vec3(6, red.arr);
     
   temp_text_print_line(font_a, "Hello World!");
   temp_text_print_line(font_a, "Is this thing working?");

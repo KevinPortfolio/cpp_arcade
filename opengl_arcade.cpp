@@ -212,3 +212,9 @@ render_update_mat4x4(uint32 variable_position, float32* data)
 {
   glUniformMatrix4fv(variable_position, 1, 0, data);
 }
+
+inline void
+render_update_vec3(uint32 variable_position, float arr[3])
+{
+  glUniform3f(variable_position, arr[0], arr[1], arr[2]);
+}

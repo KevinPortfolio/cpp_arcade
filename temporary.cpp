@@ -5,26 +5,55 @@ static v3 console_start_position;
 static v3 console_caret;
 
 void
-temp_text_print_line(Font &font, char* text)
+temp_text_print_line(Font &font, char *text)
 {
   v3 rect_position = console_caret;
   m4 model_mat = math_identity_mat();
   model_mat = math_translate(model_mat, rect_position);
   render_update_mat4x4(2, model_mat.arr);
 
-  while (*text)
+  if (text)
   {
-    char glyph = *(text++) - 32;
-    render_bind_texture(font.texture_id[glyph]);
-    render_draw(glyph_render_obj[glyph].id, glyph_render_obj[glyph].element[2].id,
-		glyph_render_obj[glyph].indice_count);
-    render_bind_texture(0);
-    v3 new_rect_position(0.0f, 0.0f, 0.0f);
-    new_rect_position.x += font.glyph_width[glyph];
-    model_mat = math_translate(model_mat, new_rect_position);
-    render_update_mat4x4(2, model_mat.arr);
+    while (*text)
+    {
+      char glyph = *(text++) - 32;
+      render_bind_texture(font.texture_id[glyph]);
+      render_draw(glyph_render_obj[glyph].id, glyph_render_obj[glyph].element[2].id,
+		  glyph_render_obj[glyph].indice_count);
+      render_bind_texture(0);
+      v3 new_rect_position(0.0f, 0.0f, 0.0f);
+      new_rect_position.x += font.glyph_width[glyph];
+      model_mat = math_translate(model_mat, new_rect_position);
+      render_update_mat4x4(2, model_mat.arr);
+    }
+    console_caret.y -= font.height;
   }
-  console_caret.y -= font.height;
+}
+
+void
+text_print(Font *font, v3 position, char *text)
+{
+  m4 model_mat = math_identity_mat();
+  model_mat = math_translate(model_mat, position);
+  render_update_mat4x4(2, model_mat.arr);
+
+  if (text)
+  {
+    while (*text)
+    {
+
+      char glyph = *(text++) - 32;
+      render_bind_texture(font->texture_id[glyph]);
+      render_draw(glyph_render_obj[glyph].id, glyph_render_obj[glyph].element[2].id,
+		  glyph_render_obj[glyph].indice_count);
+      render_bind_texture(0);
+      
+      v3 new_rect_position(0.0f, 0.0f, 0.0f);
+      new_rect_position.x += font->glyph_width[glyph];
+      model_mat = math_translate(model_mat, new_rect_position);
+      render_update_mat4x4(2, model_mat.arr);
+    }
+  }
 }
 
 void
