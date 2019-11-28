@@ -28,17 +28,6 @@ struct ObjectMesh
   uint32 indice_arr_size;
 };
 
-struct Font
-{
-  char* name;
-  int32 height;
-  int32 weight;
-  int32 glyph_width[95]{};
-  int32 glyph_height[95]{};
-  byte* glyph_data[95]{};
-  uint32 texture_id[95]{};
-};
-
 struct RenderIteration
 {
   RenderObject* render_object;

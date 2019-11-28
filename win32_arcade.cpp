@@ -15,33 +15,21 @@ typedef double float64;
 
 typedef int bool32;
 
-#define FONT_THIN             100
-#define FONT_EXTRALIGHT       200
-#define FONT_LIGHT            300
-#define FONT_NORMAL           400
-#define FONT_MEDIUM           500
-#define FONT_SEMIBOLD         600
-#define FONT_BOLD             700
-#define FONT_EXTRABOLD        800
-#define FONT_HEAVY            900
-
 #include "math.h"
 #include "render.h"
+#include "collision.cpp"
+
+#include "platform.h"
+
 #include "utility.h"
 #include "arcade.h"
 #include "utility.cpp"
 #include "memory.cpp"
-#include "collision.cpp"
 #include "temporary.cpp"
-File
-platform_read_file(char* file_path);
-char 
-platform_create_font(char* file_name, char* font_name, Font* font_object, int desired_height, int desired_weight);
-void
-platform_delete_font(Font* font_object);
 
 #include "menu.cpp"
 #include "block_fall.cpp"
+
 #include "arcade.cpp"
 #include <Windows.h>
 #include "opengl_arcade.cpp"
@@ -61,6 +49,8 @@ static HWND global_window_handle;
 
 typedef HGLRC __stdcall wgl_create_context_attribs_arb(HDC hDC, HGLRC hShareContext,
 						       const int* attribList);
+
+static int32 full_of_life;
 
 File
 platform_read_file(char* file_path)
@@ -227,6 +217,24 @@ platform_delete_font(Font* font_object)
     delete[] font_object->name;
 }
 
+void 
+platform_get_cursor_position(float64 *x, float64 *y)
+{
+  POINT cursor_position;
+  
+  if (GetCursorPos(&cursor_position))
+  {
+    ScreenToClient(global_window_handle, &cursor_position);
+    
+    *x = cursor_position.x;
+    *y = cursor_position.y;
+  }
+  else
+  {
+    // TODO: Error Checking
+  }
+}
+
 void
 win32_opengl_init(HDC device_context)
 {
@@ -292,36 +300,77 @@ win32_opengl_init(HDC device_context)
   opengl_context = opengl_modern_context;
 }
 
+void
+win32_process_pending_messages(GameState *game_state)
+{
+  MSG message;
+  while(PeekMessageA(&message, 0, 0, 0, PM_REMOVE))
+  {
+    
+    switch (message.message)
+    {
+    case WM_QUIT:
+      {
+	full_of_life = 0;
+      } break;
+    case WM_SYSKEYDOWN:
+      {} break;
+    case WM_SYSKEYUP:
+      {} break;
+    case WM_KEYDOWN:
+      {
+	uint32 vk_code = (uint32)message.wParam;
+	
+	if (vk_code == VK_ESCAPE)
+	  PostQuitMessage(0);
+      } break;
+    case WM_KEYUP:
+      {} break;
+    case WM_LBUTTONDOWN:
+      {
+	game_state->mouse.left_down = 1;
+      } break;
+    case WM_LBUTTONUP:
+      {
+	game_state->mouse.left_down = 0;
+      }
+    default:
+      {
+	TranslateMessage(&message);
+	DispatchMessageA(&message);
+      } break;
+    }
+  }
+}
+
 LRESULT CALLBACK
 win32_msg_callback(HWND window_handle, UINT msg, WPARAM w_param, LPARAM l_param)
 {
-	LRESULT result = 0;
-
-	switch (msg)
-	{
-	case WM_CREATE:
-		break;
-	case WM_CLOSE:
-		PostQuitMessage(0);
-		break;
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		break;
-	case WM_PAINT:
-		//Platform_ResizeWindow(RECTANGLE* NewWindowRect, int StartX, int StartY,
-		//	0);
-		break;
-	case WM_KEYDOWN:
-		if (w_param == VK_ESCAPE)
-			PostQuitMessage(0);
-		break;
-	case WM_SIZE: 
-		break;
-	default:
-		return DefWindowProc(window_handle, msg, w_param, l_param);
-	}
-
-	return result;
+  LRESULT result = 0;
+  
+  switch (msg)
+  {
+  case WM_CREATE:
+    break;
+  case WM_CLOSE:
+    PostQuitMessage(0);
+    break;
+  case WM_DESTROY:
+    PostQuitMessage(0);
+    break;
+  case WM_PAINT:
+    {
+      PAINTSTRUCT paint;
+      HDC device_context = BeginPaint(global_window_handle, &paint);
+      EndPaint(global_window_handle, &paint);
+    } break;
+  case WM_SIZE: 
+    break;
+  default:
+    return DefWindowProc(window_handle, msg, w_param, l_param);
+  }
+  
+  return result;
 }
 
 int WINAPI
@@ -372,18 +421,16 @@ WinMain(_In_ HINSTANCE dll_name, _In_opt_ HINSTANCE unused, _In_ LPSTR cmd_line_
 
 	ShowWindow(global_window_handle, display_flags);
 	MSG msg = {};
-	int32 full_of_life = program_start_up(&game_state);
+        full_of_life = program_start_up(&game_state);
 
 	LARGE_INTEGER last_counter;
 	QueryPerformanceCounter(&last_counter);
-	while ((msg.message != WM_QUIT) && full_of_life)
+	while (full_of_life)
 	{
-	  if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
-	  {
-	    TranslateMessage(&msg);
-	    DispatchMessage(&msg);
-	  }
-	  full_of_life = program_run_loop(&game_state);
+	  win32_process_pending_messages(&game_state);
+
+	  if (full_of_life)
+	    full_of_life = program_run_loop(&game_state);
 	  
 	  if (!SwapBuffers(window_device_context))
 	    OutputDebugStringA("Swapping Buffers Failed!");

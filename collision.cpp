@@ -8,9 +8,19 @@ CollidableRect
 bool32
 collision_test(CollidableRect a, CollidableRect b)
 {
-  if (a.max.x < b.min.x || a.min.x > b.max.x) return 0;
-  if (a.max.y < b.min.y || a.min.y > b.max.y) return 0;
-  if (a.max.z < b.min.z || a.min.z > b.max.z) return 0;
+  if ((a.max.x < b.min.x) || (a.min.x > b.max.x)) return 0;
+  if ((a.max.y < b.min.y) || (a.min.y > b.max.y)) return 0;
+  if ((a.max.z < b.min.z) || (a.min.z > b.max.z)) return 0;
+  return 1;
+}
+
+bool32
+collision_test(v3 point, CollidableRect rect)
+{
+  if ((point.x < rect.min.x) || (point.x > rect.max.x)) return 0;
+  if ((point.y < rect.min.y) || (point.y > rect.max.y)) return 0;
+  if ((point.z < rect.min.z) || (point.z > rect.max.z)) return 0;
+
   return 1;
 }
 

@@ -30,17 +30,29 @@ menu_loop(GameState *game_state)
   render_use_shader(buttons.shader_id);
   render_update_mat4x4(3, game_state->camera->view_mat.arr);
   render_update_mat4x4(4, game_state->camera->projection_mat.arr);
-  render_update_int(5, 0);
+  //  render_update_int(5, 0);
 
+  float64 cursor_x;
+  float64 cursor_y;
+  platform_get_cursor_position(&cursor_x, &cursor_y);
+  v3 cursor_position((float32)cursor_x, -((float32)cursor_y - (float32)game_state->window_height), 0.0f);
+
+  //  v3 cursor_ray = collision_screen_picking(&game_state->camera->projection_mat, &game_state->camera->view_mat,
+  //					   &cursor_position, game_state->window_width, game_state->window_height);
+
+  if (collision_test(cursor_position, a) && (game_state->mouse.left_down == 1))
+  {
+    game_state->module_id = 2;
+  }
   if (collision_test(a, b))
   {
     game_state->module_id = 2;
   }
   else
   {
-    buttons.position[1].x += 0.1f;
-    a.min.x += 0.1f;
-    a.max.x += 0.1f;
+    //buttons.position[1].x += 0.1f;
+    //a.min.x += 0.1f;
+    //a.max.x += 0.1f;
   }
   
   render_bind_texture(game_state->texture_id);
