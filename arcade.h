@@ -3,10 +3,11 @@
 
 struct GameState
 {
+  int8 keyboard[128]{};
   Camera *camera;
   Font *font;
   Mouse mouse;
-  
+
   int32 window_width;
   int32 window_height;
   uint32 module_id;

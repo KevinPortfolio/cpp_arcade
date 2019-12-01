@@ -1,1 +1,4 @@
 *.bat
+img
+*.png
+stb_image.h

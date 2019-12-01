@@ -35,8 +35,8 @@ program_start_up(GameState* game_state)
 
   gpu_alloc_font(&font_a);
   
-  float32 blue[4] = {0.0f, 0.0f, 1.0f, 0.0};
-  render_set_screen_clear_color(blue);
+  float32 clear_screen_color[4] = {0.0f, 0.0f, 0.0f, 0.0};
+  render_set_screen_clear_color(clear_screen_color);
   render_set_viewport(0, 0, game_state->window_width, game_state->window_height);
   
   camera.up_vec = v3(0.0f, 1.0f, 0.0f);
@@ -76,14 +76,6 @@ program_run_loop(GameState *game_state)
   render_clear_screen();
   
   modules[game_state->module_id](game_state);
-  
-  //  render_use_shader(shader[0].id);
-  //render_update_mat4x4(3, camera.view_mat.arr);
-  //render_update_mat4x4(4, camera.projection_mat.arr);
-
-  //  m4 model_mat = math_identity_mat();
-  //render_update_mat4x4(2, model_mat.arr);
-  //render_draw(line.id, 0, line.vertice_count, RENDER_MODE_LINES);
     
   render_use_shader(shader[2].id);  // NOTE: begin console draw
   render_update_mat4x4(3, camera.view_mat.arr);

@@ -23,6 +23,10 @@ typedef int bool32;
 
 #include "utility.h"
 #include "arcade.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h" // TODO: Write custom png and bmp loader
+
 #include "utility.cpp"
 #include "memory.cpp"
 #include "temporary.cpp"
@@ -323,9 +327,25 @@ win32_process_pending_messages(GameState *game_state)
 	
 	if (vk_code == VK_ESCAPE)
 	  PostQuitMessage(0);
+	else if (vk_code == VK_SPACE)
+	  game_state->keyboard[' '] = 1;
+	else if (vk_code == 'A')
+	  game_state->keyboard['a'] = 1;
+	else if (vk_code == 'D')
+	  game_state->keyboard['d'] = 1;
+	  
       } break;
     case WM_KEYUP:
-      {} break;
+      {
+	uint32 vk_code = (uint32)message.wParam;
+		
+	if (vk_code == VK_SPACE)
+	  game_state->keyboard[' '] = 0;
+	else if (vk_code == 'A')
+	  game_state->keyboard['a'] = 0;
+	else if (vk_code == 'D')
+	  game_state->keyboard['d'] = 0;
+      } break;
     case WM_LBUTTONDOWN:
       {
 	game_state->mouse.left_down = 1;
